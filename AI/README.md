@@ -15,6 +15,9 @@ $ pipenv install
 or
 $ pip install -r requirements.txt
 ```
+- Create a `.env` copy of `.env.sample`, and edit the values.
+
+- You're good to go :rocket:
 
 ## Contributors
 

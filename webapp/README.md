@@ -2,14 +2,14 @@
 > This is a Laravel application. For more information, visit the official website of [Laravel](https://laravel.com/docs/) 
 
 ## Prerequisites
-1- [PHP](https://www.php.net/downloads)
-2- SQL Database, for example [MySQL](https://www.mysql.com/downloads/)
-3- [Composer](https://getcomposer.org/download/):  Dependency Manager for PHP
+1. [PHP](https://www.php.net/downloads)
+2. SQL Database, for example [MySQL](https://www.mysql.com/downloads/)
+3. [Composer](https://getcomposer.org/download/):  Dependency Manager for PHP
 
 NOTE: You can have both PHP and MySQL just by downloading [XAMPP](https://www.apachefriends.org/download.html) or [Laragon](https://laragon.org/download/index.html).
 
 ## Run the application
-- Installing all the necessarary requirements
+- Installing all the necessary requirements
 ```bash
 $ composer install
 $ composer update

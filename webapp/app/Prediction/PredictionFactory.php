@@ -2,6 +2,7 @@
 
 namespace App\Prediction;
 
+use Exception;
 use App\Prediction\PredictionServerException;
 use Illuminate\Support\Facades\Http;
 
@@ -51,12 +52,25 @@ class PredictionFactory
      */
     public function predict(): PredictionFactory
     {
-        if ($this->response() === "1") {
-            $this->isSpam = true;
-        } else if ($this->response() === "0") {
-            $this->isSpam = false;
-        } else {
-            throw new PredictionServerException("The prediction server threw an unknown value \"{$this->response()}\", check with the prediction server administration.");
+        $response = $this->response();
+
+        $responseObject = json_decode($response);
+
+        try {
+            if (is_object($responseObject) && isset($responseObject->spam)) {
+                if ($responseObject->spam === 1) {
+                $this->isSpam = true;
+                } else if ($responseObject->spam === 0) {
+                    $this->isSpam = false;
+                } else {
+                    throw new Exception();
+                }
+            } else {
+                throw new Exception();
+            }
+            
+        } catch (Exception $e) {
+            throw new PredictionServerException("The prediction server threw an unknown value \"{$response}\", check with the prediction server administration.");
         }
 
         return $this;
@@ -90,6 +104,8 @@ class PredictionFactory
     protected function response(): string
     {
         $response = Http::timeout($this->timeout)
+            ->acceptJson()
+            ->asForm()
             ->post($this->url, [
                 'message'   => $this->message,
                 'token'   => $this->token,

@@ -22,13 +22,6 @@ class MessageController extends Controller
 
     public function predict(Message $message, Request $request)
     {
-        return [
-            'result'    => [
-                'message_id' => 1,
-                'is_spam' => false,
-            ]
-        ];
-
         $prediction = $message->prediction()->first();
         
         if ( ! $prediction) {

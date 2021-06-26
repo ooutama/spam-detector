@@ -13,7 +13,6 @@ import nltk
 from nltk import SnowballStemmer
 from nltk.corpus import stopwords
 from nltk.tokenize import sent_tokenize
-from nltk.stem import WordNetLemmatizer
 
 from sklearn.base import BaseEstimator, TransformerMixin
 
@@ -114,10 +113,6 @@ class CleanText(BaseEstimator, TransformerMixin):
 		# Replace phone numbers with 'phonenumber'
 		return re.sub(r'\d{5,}', ' phonenumber ', input_text)
 
-	def replace_emojis(self, input_text):
-		# TODO :Replace emojis with their code
-		pass
-
 	def replace_punctuation(self, input_text):
 		# Replace punctuation with a space
 		return input_text.translate(str.maketrans(dict.fromkeys(list(string.punctuation), ' ')))
@@ -143,14 +138,6 @@ class CleanText(BaseEstimator, TransformerMixin):
 		stemmed_words = [stemmer.stem(word) for word in words]
 		return ' '.join(stemmed_words)
 
-	def apply_lemmatization(self, input_text):
-		lemmatizer = WordNetLemmatizer()
-
-		words = input_text.split()
-		lemmatized_words = [lemmatizer.lemmatize(
-			word, pos="v") for word in words]
-		return ' '.join(lemmatized_words)
-
 	def fit(self, X, y=None, **fit_params):
 		return self
 
@@ -161,20 +148,12 @@ class CleanText(BaseEstimator, TransformerMixin):
 		clean_X = clean_X.apply(self.replace_currency)
 		clean_X = clean_X.apply(self.replace_urls)
 		clean_X = clean_X.apply(self.replace_phone_numbers)
-		# clean_X = clean_X.apply(self.replace_emojis)
 		clean_X = clean_X.apply(self.replace_punctuation)
 		clean_X = clean_X.apply(self.remove_extra_whitespace)
 		clean_X = clean_X.apply(self.remove_digits)
 		clean_X = clean_X.apply(self.remove_stopwords)
 		clean_X = clean_X.apply(self.apply_stemming)
 		return clean_X
-
-
-@app.route('/predict', methods=['POST'])
-def predict():
-	print(request.form)
-	message = [request.form['message']]
-	return jsonify(model(model_path, message))
 
 
 def model(model_path, data):
@@ -201,6 +180,14 @@ def model(model_path, data):
 	model = load(model_path)
 	prediction = model.predict(df).tolist()[0]
 	return {"spam" : prediction}
+
+
+@app.route('/predict', methods=['POST'])
+def predict():
+	print(request.form)
+	message = [request.form['message']]
+	return jsonify(model(model_path, message))
+
 
 if __name__ == "__main__":
 	app.run(port=app_port)

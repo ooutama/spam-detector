@@ -9,7 +9,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - run: cp ${{ github.workspace }}/.env.sample ${{ github.workspace }}/.env
+      - run: ls ${{ github.workspace }}
       - uses: actions/checkout@v2
       - uses: akhileshns/heroku-deploy@v3.12.12
         with:

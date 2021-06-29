@@ -24,8 +24,10 @@ model_filename = os.getenv('MODEL_FILENAME')
 # Path to model
 model_path = os.path.join("model", model_filename)
 
-# Application port
+# Application port from .env
 app_port = int(os.getenv('FLASK_PORT'))
+
+app = Flask(__name__)
 
 class ColumnExtractor(TransformerMixin, BaseEstimator):
 	def __init__(self, cols):
@@ -179,13 +181,9 @@ def model(model_path, data):
 	return {"spam" : prediction}
 
 
-app = Flask(__name__)
 
 @app.route('/predict', methods=['POST'])
 def predict():
 	print(request.form)
 	message = [request.form['message']]
 	return jsonify(model(model_path, message))
-
-
-app.run(port=app_port)

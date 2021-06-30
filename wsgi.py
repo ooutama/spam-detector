@@ -6,7 +6,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Application port
-app_port = int(os.getenv('FLASK_PORT'))
+#os.getenv('FLASK_PORT')
+app_port = int(5000)
 
 if __name__ == "__main__":
 	app.run(port=app_port)

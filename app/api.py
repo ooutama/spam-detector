@@ -23,7 +23,7 @@ model_filename = "model.joblib" #os.getenv('MODEL_FILENAME')
 
 # Path to "AI" folder
 parent = os.path.dirname(os.path.realpath(__file__)).rsplit(os.sep, 1)[0]
-model_path = os.path.join(parent, "model", model_filename)
+model_path = os.path.join("..", "model", model_filename)
 
 
 app = Flask(__name__)

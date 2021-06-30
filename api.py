@@ -1,9 +1,11 @@
-
+import os
 import re
 import string
 
 import nltk
 import pandas as pd
+from flask import Flask, jsonify, request
+from joblib import load
 from nltk import SnowballStemmer
 from nltk.corpus import stopwords
 from nltk.tokenize import sent_tokenize
@@ -14,8 +16,23 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import FeatureUnion, Pipeline
 from sklearn.preprocessing import LabelEncoder
 
-from joblib import load
 
+# from dotenv import load_dotenv
+
+
+
+
+# load_dotenv()
+
+# Get model filename from .env file
+model_filename = "model.joblib" #os.getenv('MODEL_FILENAME')
+
+model_path = os.path.join(os.getcwd(), "model", model_filename)
+
+print(__name__)
+print(model_path)
+
+app = Flask(__name__)
 
 
 class FeaturesExtractor(BaseEstimator, TransformerMixin):
@@ -170,3 +187,17 @@ def model(model_path, data):
 	print(__name__)
 	prediction = model.predict(df).tolist()[0]
 	return {"spam": prediction}
+
+
+@app.route('/predict', methods=['POST'])
+def predict():
+	print(model_path)
+	print(request.form)
+	message = [request.form['message']]
+	response = model(model_path, message)
+	print(f'{message} : {["ham","spam"][response["spam"]]}')
+	return jsonify(response)
+
+
+if __name__ == "__main__":
+	app.run(port=5000)

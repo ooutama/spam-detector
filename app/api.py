@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify
 
 import re
 import os
@@ -15,19 +15,22 @@ from nltk.corpus import stopwords
 from nltk.tokenize import sent_tokenize
 
 from sklearn.base import BaseEstimator, TransformerMixin
+import logging
 
 load_dotenv()
+
+logging.basicConfig(filename='logger.log', level=logging.DEBUG)
 
 # Get model filename from .env file
 model_filename = os.getenv('MODEL_FILENAME')
 
-# Path to model
-model_path = os.path.join("model", model_filename)
+# Path to "AI" folder
+parent = os.path.dirname(os.path.realpath(__file__)).rsplit(os.sep, 1)[0]
+model_path = os.path.join(parent, "model", model_filename)
 
-# Application port from .env
-app_port = int(os.getenv('FLASK_PORT'))
 
 app = Flask(__name__)
+
 
 class ColumnExtractor(TransformerMixin, BaseEstimator):
 	def __init__(self, cols):
@@ -181,16 +184,10 @@ def model(model_path, data):
 	return {"spam" : prediction}
 
 
-
 @app.route('/predict', methods=['POST'])
 def predict():
 	print(request.form)
 	message = [request.form['message']]
-	return jsonify(model(model_path, message))
-
-@app.route('/', methods=['GET'])
-def f():
-	return render_template('index.html',)
-
-if __name__ == "__main__":
-    app.run()
+	response = model(model_path, message)
+	logging.info(f'{message} : {["ham","spam"][response["spam"]]}')
+	return jsonify(response)

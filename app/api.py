@@ -15,11 +15,8 @@ from nltk.corpus import stopwords
 from nltk.tokenize import sent_tokenize
 
 from sklearn.base import BaseEstimator, TransformerMixin
-import logging
 
 load_dotenv()
-
-logging.basicConfig(filename='logger.log', level=logging.DEBUG)
 
 # Get model filename from .env file
 model_filename = os.getenv('MODEL_FILENAME')
@@ -189,5 +186,5 @@ def predict():
 	print(request.form)
 	message = [request.form['message']]
 	response = model(model_path, message)
-	logging.info(f'{message} : {["ham","spam"][response["spam"]]}')
+	print(f'{message} : {["ham","spam"][response["spam"]]}')
 	return jsonify(response)

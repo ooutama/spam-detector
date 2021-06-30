@@ -25,8 +25,6 @@ model_filename = "model.joblib" #os.getenv('MODEL_FILENAME')
 parent = os.path.dirname(os.path.realpath(__file__)).rsplit(os.sep, 1)[0]
 model_path = os.path.join(parent, "model", model_filename)
 
-print(model_path)
-
 
 app = Flask(__name__)
 
@@ -185,6 +183,7 @@ def model(model_path, data):
 
 @app.route('/predict', methods=['POST'])
 def predict():
+	print(model_path)
 	print(request.form)
 	message = [request.form['message']]
 	response = model(model_path, message)

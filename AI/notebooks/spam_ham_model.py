@@ -1,43 +1,58 @@
-from flask import Flask, request, jsonify
 
+import csv
 import re
-import os
 import string
-from joblib import load
-
-from dotenv import load_dotenv
-
-import pandas as pd
 
 import nltk
+import pandas as pd
+from joblib import dump
 from nltk import SnowballStemmer
 from nltk.corpus import stopwords
 from nltk.tokenize import sent_tokenize
-
 from sklearn.base import BaseEstimator, TransformerMixin
-
-load_dotenv()
-
-# Get model filename from .env file
-model_filename = os.getenv('MODEL_FILENAME')
-
-# Path to "AI" folder
-parent = os.path.dirname(os.path.realpath(__file__)).rsplit(os.sep, 1)[0]
-model_path = os.path.join(parent, "model", model_filename)
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.pipeline import FeatureUnion, Pipeline
+from sklearn.preprocessing import LabelEncoder
 
 
-app = Flask(__name__)
+df = pd.read_csv('../data/SMSSpamCollection.txt', sep=',\s+', quoting=csv.QUOTE_ALL, delimiter='\t', names=['target', 'message'])
+
+df['target'] = df['target'].apply(lambda row: row.strip())
+
+special_chars = {
+	"&quot;": '"',
+	"&apos;": "'",
+	"&amp;": "&",
+	"&lt;": "<",
+	"&gt;": ">"
+}
+df = df.replace({'message': special_chars}, regex=True)
 
 
-class ColumnExtractor(TransformerMixin, BaseEstimator):
-	def __init__(self, cols):
-		self.cols = cols
+brackets = set()
 
-	def transform(self, X, **transform_params):
-		return X[self.cols]
 
-	def fit(self, X, y=None, **fit_params):
-		return self
+def find_brackets(row):
+	global brackets
+	for bracket in re.findall(r'<[a-zA-Z0-9\s#]+>+', row):
+		brackets.add(bracket)
+
+
+df['message'].apply(find_brackets)
+
+
+special_chars = {
+	"<DECIMAL>": '123',
+	"<UKP>": "£",
+	"<EMAIL>": "abc@email.com",
+	"<fone no>": "<phone 0123456789>",
+	"<URL>": "https://www.abcd.com",
+	"<#>": "321",
+	"<TIME>": "13:00"
+}
+df = df.replace({'message': special_chars}, regex=True)
 
 
 class FeaturesExtractor(BaseEstimator, TransformerMixin):
@@ -81,6 +96,17 @@ class FeaturesExtractor(BaseEstimator, TransformerMixin):
 		return self
 
 
+class ColumnExtractor(TransformerMixin, BaseEstimator):
+	def __init__(self, cols):
+		self.cols = cols
+
+	def transform(self, X, **transform_params):
+		return X[self.cols]
+
+	def fit(self, X, y=None, **fit_params):
+		return self
+
+
 class CleanText(BaseEstimator, TransformerMixin):
 
 	def __init__(self):
@@ -105,7 +131,9 @@ class CleanText(BaseEstimator, TransformerMixin):
 
 	def replace_urls(self, input_text):
 		# Replace links with 'weblink'
+		link_regex = r'(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)'
 		link_regex1 = r'https?://\S+|www\.\S+'
+		link_regex2 = r'http.?://[^\s]+[\s]?'
 		return re.sub(link_regex1, ' weblink ', input_text)
 
 	def replace_phone_numbers(self, input_text):
@@ -155,34 +183,46 @@ class CleanText(BaseEstimator, TransformerMixin):
 		return clean_X
 
 
-def model(model_path, data):
-	"""This functions performs feature extraction and text cleaning
-	Then loads the model and runs the prediction
+tc = FeaturesExtractor()
+ct = CleanText()
 
-	Args:
-		model_path (string)
-		data (List[string])
-
-	Returns:
-		dict: key : "spam", value : 1 (spam) or 0 (ham)
-	"""	
-
-	df = pd.DataFrame(data, columns=['message'])
-	tc = FeaturesExtractor()
-	ct = CleanText()
-
-	df_counts = tc.transform(df)
-	df_clean = ct.transform(df.message)
-	df = df_counts
-	df['message_clean'] = df_clean
-
-	model = load(model_path)
-	prediction = model.predict(df).tolist()[0]
-	return {"spam" : prediction}
+df = tc.fit_transform(df)
+clean_msg = ct.fit_transform(df.message)
 
 
-@app.route('/predict', methods=['POST'])
-def predict():
-	print(request.form)
-	message = [request.form['message']]
-	return jsonify(model(model_path, message))
+empty = clean_msg == ''
+clean_msg.loc[empty] = 'no_text'
+df['message_clean'] = clean_msg
+
+
+encoder = LabelEncoder()
+targets = encoder.fit_transform(df.target)
+
+df['target_encoded'] = targets
+
+
+X, y = df.drop(['target_encoded', 'target'], axis=1), df.target_encoded
+
+X_train, X_test, y_train, y_test = train_test_split(
+	X, y, test_size=0.1, random_state=37)
+
+
+textcountscols = ['word_count', 'sentence_count', 'brackets_count', 'links_count', 'phone_count', 'money_count']
+
+
+vectorizer = CountVectorizer(max_df=0.25, min_df=1, ngram_range=(1, 2))
+clf_mnb = MultinomialNB(alpha=0.3)
+
+vect_pipe = Pipeline(
+	[('cleantext', ColumnExtractor(cols='message_clean')), ('vect', vectorizer)])
+col_ext = ColumnExtractor(cols=textcountscols)
+
+features = FeatureUnion(
+	[('textcounts', col_ext), ('pipe', vect_pipe)], n_jobs=-1)
+pipeline = Pipeline([('features', features), ('clf', clf_mnb)])
+
+best_model = pipeline.fit(X_train, y_train)
+
+
+model_path = '../model/model.joblib'
+dump(best_model, model_path)

@@ -15,12 +15,21 @@ $ pipenv install
 or
 $ pip install -r requirements.txt
 ```
-- Create a `.env` copy of `.env.sample`, and edit the values.
+- Create a `.env` copy of `.env.sample` located in `api` folder, and edit the values.
+
+- Run the notebook to retrain the model or run `wsgi.py` to start the Flask API.
 
 - You're good to go :rocket:
 
-## Contributors
+#### Run the server
+```bash
+$ python wsgi.py
+```
+- Send a `POST` request to `/predict` with `message` argument containing the message string (form encoded)
 
-- [@ManalSjd](https://github.com/ManalSjd)
-- [@outama-othmane](https://github.com/outama-othmane)
-- [@Aymane11](https://github.com/Aymane11)
+- The response will be a json object like this
+```json
+{
+  "spam": 0 or 1
+}
+```

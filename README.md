@@ -30,6 +30,6 @@ $ python wsgi.py
 - The response will be a json object like this
 ```json
 {
-  "spam": 0 or 1
+  "spam": 0 #or 1
 }
 ```

@@ -1,5 +1,6 @@
 import os
 from app.api import *
+from app.spam_ham import *
 from dotenv import load_dotenv
 
 

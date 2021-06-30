@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 
 import re
 import os
@@ -188,6 +188,9 @@ def predict():
 	message = [request.form['message']]
 	return jsonify(model(model_path, message))
 
+@app.route('/', methods=['GET'])
+def f():
+	return render_template('index.html',)
 
 if __name__ == "__main__":
     app.run()

@@ -5,7 +5,7 @@ import os
 import string
 from joblib import load
 
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
 import pandas as pd
 
@@ -16,7 +16,7 @@ from nltk.tokenize import sent_tokenize
 
 from sklearn.base import BaseEstimator, TransformerMixin
 
-load_dotenv()
+# load_dotenv()
 
 # Get model filename from .env file
 model_filename = "model.joblib" #os.getenv('MODEL_FILENAME')
@@ -24,6 +24,8 @@ model_filename = "model.joblib" #os.getenv('MODEL_FILENAME')
 # Path to "AI" folder
 parent = os.path.dirname(os.path.realpath(__file__)).rsplit(os.sep, 1)[0]
 model_path = os.path.join(parent, "model", model_filename)
+
+print(model_path)
 
 
 app = Flask(__name__)

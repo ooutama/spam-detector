@@ -187,3 +187,7 @@ def predict():
 	print(request.form)
 	message = [request.form['message']]
 	return jsonify(model(model_path, message))
+
+
+if __name__ == "__main__":
+    app.run()

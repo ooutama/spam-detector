@@ -19,7 +19,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 load_dotenv()
 
 # Get model filename from .env file
-model_filename = os.getenv('MODEL_FILENAME')
+model_filename = "model.joblib" #os.getenv('MODEL_FILENAME')
 
 # Path to "AI" folder
 parent = os.path.dirname(os.path.realpath(__file__)).rsplit(os.sep, 1)[0]

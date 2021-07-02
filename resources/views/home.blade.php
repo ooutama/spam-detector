@@ -5,11 +5,11 @@
         <div class="container mx-auto">
             <div class="main-section-items" style="min-height: calc(100vh - 70px);">
                 <div class="col1">
-                    <h1 class="display-title">{{ __('Welcome
-                        to :title Application', ['title' => config('app.name')]) }}</h1>
+                    <h1 class="display-title">{{ __(':title Application', ['title' => config('app.name')]) }}</h1>
                     <p class="display-subtitle">
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-                        labore.
+                        {{-- Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+                        labore. --}}
+                        Check if the suspicious message is SPAM or not.
                     </p>
                 </div>
                 <div class="col2">
@@ -24,7 +24,10 @@
                 <h2 class="title">{{ __('About us') }}</h2>
             </div>
             <div class="relative">
-                <p class="subtitle">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+                <p class="subtitle">
+                    Students at the National School of Applied Sciences in Marrakech.
+                    {{-- Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. --}}
+                </p>
                 <div class="cards">
                     <div class="card-1">
                         <a href="https://github.com/outama-othmane"
